@@ -17,7 +17,8 @@
         class="form-content"
         ref="form"
         :model="form"
-        :rules="rules">
+        :rules="rules"
+        :loading="codeLoading">
         <el-form-item prop="mobile">
           <el-input v-model="form.mobile" placeholder="手机号"></el-input>
         </el-form-item>
@@ -39,7 +40,7 @@
           <span class="agree-text">我已阅读并同意<a href="#">用户协议</a>和<a href="#">隐私条款</a></span>
         </el-form-item>
         <el-form-item>
-          <el-button class="btn-login" type="primary" @click="handleLogin">登录</el-button>
+          <el-button class="btn-login" type="primary" @click="handleLogin" :loading="codeLoading">登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -50,6 +51,8 @@
 import '@/vendor/gt' // 引入极验 JavaScript SDK 文件，通过 window.initGeetest 使用
 import { saveUser } from '@/utils/auth' // 按需加载，加载模块中非 export default 成员
 import initGeetest from '@/utils/init-geetest'
+loginLoading: false // 登陆中
+codeLoading: false
 const initCodeTimeSeconds = 60
 
 export default {
@@ -95,6 +98,7 @@ export default {
     },
 
     async submitLogin () {
+      this.loginLoading = true
       try {
         const userInfo = await this.$http({
           method: 'POST',
@@ -113,6 +117,7 @@ export default {
       } catch (err) {
         this.$message.error('登录失败，手机号或验证码错误')
       }
+      this.loginLoading = false
     },
 
     handleSendCode () {
@@ -131,50 +136,58 @@ export default {
      * 验证通过，初始化显示人机交互验证码
      */
     async showGeetest () {
-      // 任何函数中的 function 函数内部的 this 指向 window
-      const { mobile } = this.form
-
-      const data = await this.$http({
-        method: 'GET',
-        url: `/captchas/${mobile}`
-      })
-
-      const captchaObj = await initGeetest({
-        // 以下配置参数来自服务端 SDK
-        gt: data.gt,
-        challenge: data.challenge,
-        offline: !data.success,
-        new_captcha: data.new_captcha,
-        product: 'bind' // 隐藏，直接弹出式
-      })
-
-      captchaObj.onReady(() => {
-        // 验证码ready之后才能调用verify方法显示验证码
-        captchaObj.verify() // 弹出验证码内容框
-      }).onSuccess(async () => {
-        // your code
-        const {
-          geetest_challenge: challenge,
-          geetest_seccode: seccode,
-          geetest_validate: validate } =
-        captchaObj.getValidate()
-
-        // 发送短信
-        await this.$http({
+      try {
+        this.codeLoading = true
+        // 任何函数中的 function 函数内部的 this 指向 window
+        const { mobile } = this.form
+        const data = await this.$http({
           method: 'GET',
-          url: `/sms/codes/${mobile}`,
-          params: {
-            challenge,
-            validate,
-            seccode
-          }
+          url: `/captchas/${mobile}`
         })
 
-        // 开始倒计时
-        this.codeCountDown()
-      })
-    },
+        const captchaObj = await initGeetest({
+        // 以下配置参数来自服务端 SDK
+          gt: data.gt,
+          challenge: data.challenge,
+          offline: !data.success,
+          new_captcha: data.new_captcha,
+          product: 'bind' // 隐藏，直接弹出式
+        })
 
+        captchaObj.onReady(() => {
+          this.codeLoading = false
+          // 验证码ready之后才能调用verify方法显示验证码
+          captchaObj.verify() // 弹出验证码内容框
+        }).onSuccess(async () => {
+          try {
+            // your code
+            const {
+              geetest_challenge: challenge,
+              geetest_seccode: seccode,
+              geetest_validate: validate } =
+        captchaObj.getValidate()
+            await this.$http({
+              method: 'GET',
+              url: `/sms/codes/${mobile}`,
+              params: {
+                challenge,
+                validate,
+                seccode
+              }
+            })
+
+            // 开始倒计时
+            this.codeCountDown()
+          } catch (err) {
+            this.$message.error('获取验证码失败')
+            this.codeLoading = false
+          }
+        })
+      } catch (err) {
+        this.$message.error('获取验证码失败')
+        this.codeLoading = false
+      }
+    },
     /**
      * 验证码倒计时
      */

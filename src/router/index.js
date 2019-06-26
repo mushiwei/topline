@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import nprogress from 'nprogress'
 import { getUser } from '@/utils/auth'
-import { format } from 'url';
+import { format } from 'url'
 Vue.use(Router)
 const router = new Router({
   routes: [

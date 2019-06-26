@@ -60,8 +60,8 @@
       </template>
     </el-table-column>
     </el-table>
-    <!-- 数据分页 
-     page-size 配置每页大小,默认是 10 
+    <!-- 数据分页
+     page-size 配置每页大小,默认是 10
      total 用来配置总记录数
      分页组件会根据每页大小和总记录数进行分页-->
      <el-pagination background layout="prev,pager,next"
@@ -84,11 +84,11 @@ export default {
       statTypes: [{
         type: [],
         label: '草稿'
-      }, 
+      },
       {
         type: '',
         label: '待审核'
-      }, 
+      },
       {
         type: 'success',
         label: '审核通过'
@@ -98,10 +98,10 @@ export default {
         label: '已删除'
       }
       ],
-      pageSize: 10,//每页大小
-      totalCount: 0,//总数据量
-      page: 1,//当前页码
-      articleLoading: false //加载中
+      pageSize: 10, // 每页大小
+      totalCount: 0, // 总数据量
+      page: 1, // 当前页码
+      articleLoading: false // 加载中
     }
   },
   created () {
@@ -117,8 +117,8 @@ export default {
         method: 'GET',
         url: '/articles',
         params: {
-          page: this.page,//页码
-          per_page: this.pageSize//每页大小
+          page: this.page, // 页码
+          per_page: this.pageSize// 每页大小
         }
       })
       this.articles = data.results
