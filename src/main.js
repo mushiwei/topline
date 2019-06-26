@@ -12,7 +12,7 @@ import './styles/index.css'
 // 配置axios的基础路径
 // 发请求的时候就不需要每次都写 axios（{ url: '/authorizations'}）
 // 路径最后的 /,多退少补
-axios.defaults.baseURL = 'http://ttapi.research.itcast.cn/mp/v1_0'
+axios.defaults.baseURL = 'http://toutiao.course.itcast.cn/mp/v1_0'
 
 Vue.use(ElementUI)
 

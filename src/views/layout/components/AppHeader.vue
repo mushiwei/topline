@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import { removeUser, getUSer } from '@/utils/auth'
+import { removeUser, getUser } from '@/utils/auth'
 export default {
   name: 'AppHeader',
   data () {
