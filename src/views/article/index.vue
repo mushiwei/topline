@@ -63,6 +63,20 @@ export default {
         address: '上海市普陀区金沙江路 1516弄'
       }]
     }
+  },
+  created () {
+    this.loadArticles()
+  },
+  methods: {
+    async loadArticles () {
+      // 除了登录相关接口之后,其它接口都必须在请求头中通过 Authorization字段提供用户 token
+      // 当我们登录成功,服务端会生成一个 token令牌,放到用户信息中
+      const data = await this.$http({
+        method: 'GET',
+        url: '/articles'
+      })
+      console.log(data)
+    }
   }
 }
 </script>
