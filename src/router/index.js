@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import nprogress from 'nprogress'
 import { getUser } from '@/utils/auth'
+import { format } from 'url';
 Vue.use(Router)
 const router = new Router({
   routes: [
@@ -59,6 +60,11 @@ router.beforeEach((to, from, next) => {
     // 非登录页面
     // 没有登录,跳转到登录页面
     if (!userInfo) {
+      // 如果来自登录页的页面,是不会重新进行页面导航的,也就不会触发后面的afterEach钩子
+      // 所以在这里手动结束动画,防止出现在登录页访问其他页面顶部一直loading的问题
+      if (from.path === '/login') {
+        nprogress.done()
+      }
       next({ name: 'login' })
     } else {
       // 登录了,允许通过
